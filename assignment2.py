@@ -210,8 +210,8 @@ def cobj(params, y):
     return - cond_loglikelihood_ar7(params,y)
 
 # Minimize the conditional log-likelihood using the L-BFGS-B algorithm:
-results = scipy.optimize.minimize(cobj, params, args = y, method='L-BFGS-B')
-results
+results1 = scipy.optimize.minimize(cobj, params, args = y, method='L-BFGS-B')
+results1
 
 # We can see that the values of result.x are equal to the OLS parameters
 
@@ -226,5 +226,5 @@ bounds_sigma = tuple((0,np.inf) for _ in range(1))
 bounds = bounds_constant + bounds_phi + bounds_sigma
 
 ## L-BFGS-B support bounds
-results = scipy.optimize.minimize(uobj, results.x, args = y, method='L-BFGS-B', bounds = bounds)
-results
+results2 = scipy.optimize.minimize(uobj, results1.x, args = y, method='L-BFGS-B', bounds = bounds)
+results2
