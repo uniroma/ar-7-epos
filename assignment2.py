@@ -121,3 +121,110 @@ def unconditional_ar_mean_variance(c, phis, sigma2): # 'c' = the constant term o
 from scipy.stats import norm
 from scipy.stats import multivariate_normal
 import numpy as np
+
+# Create the lagged matrix: 
+    # Empty matrix with n rows and max_lag columns
+def lagged_matrix(Y, max_lag=7):
+    n = len(Y)
+    lagged_matrix = np.full((n, max_lag), np.nan)   
+
+    # Fill each column with the appropriately lagged data:
+    for lag in range(1, max_lag + 1):
+        lagged_matrix[lag:, lag - 1] = Y[:-lag]
+    return lagged_matrix
+
+
+# CONDITIONAL log-likelihood:
+def cond_loglikelihood_ar7(params, y):
+    c = params[0] 
+    phi = params[1:8]
+    sigma2 = params[8]
+
+    # Compute the unconditional mean and variance:
+    mu, Sigma, stationary = unconditional_ar_mean_variance(c, phi, sigma2)
+
+    # Check that at phis the process is stationary, return -Inf if it is not:
+    if not(stationary):
+        return -np.inf
+    
+    # The distribution of 
+    # y_t|y_{t-1}, ..., y_{t-7} ~ N(c+\phi_{1}*y_{t-1}+...+\phi_{7}y_{t-7}, sigma2)
+
+    # Create lagged matrix:
+    X = lagged_matrix(y, 7)
+            # Matrix containing the lagged values of y up to the seventh lag;
+    yf = y[7:]
+            # yf contains the original time series from the seventh observation onward,
+    Xf = X[7:,:]
+            # Xf will be the corresponding lagged matrix.
+    
+    # Compute the conditional log-likelihood:
+    loglik = np.sum(norm.logpdf(yf, loc=(c + Xf@phi), scale=np.sqrt(sigma2)))
+    return loglik
+
+
+# UNCONDITIONAL log-likelihood:
+def uncond_loglikelihood_ar7(params, y):
+    # The unconditional loglikelihood is the unconditional "plus" the density of the
+    # first p (7 in our case) observations
+    cloglik = cond_loglikelihood_ar7(params, y)
+
+    # Calculate initial
+    # y_1, ..., y_7 ~ N(mu, sigma_y)
+    c = params[0] 
+    phi = params[1:8]
+    sigma2 = params[8]
+
+    # Compute the unconditional mean and variance:
+    mu, Sigma, stationary = unconditional_ar_mean_variance(c, phi, sigma2)
+
+    # Checking for stationarity:
+    if not(stationary):
+        return -np.inf
+    
+    mvn = multivariate_normal(mean=mu, cov=Sigma, allow_singular=True)
+    uloglik = cloglik + mvn.logpdf(y[0:7])
+    return uloglik
+    
+
+# OPTIMIZATION TO ESTIMATE THE PARAMETERS
+
+# Define y:
+y = Y
+
+# Ordinary Least Squares:
+X = lagged_matrix(y, 7)
+yf = y[7:]
+Xf = np.hstack((np.ones((len(yf),1)), X[7:,:]))
+
+# Estimate the parameters and the variance: 
+beta = np.linalg.solve(Xf.T@Xf, Xf.T@yf)
+beta        # To see the estimates 
+sigma2_hat = np.mean((yf - Xf@beta)**2)
+
+# They are concatenated into a single vector:
+params = np.hstack((beta, sigma2_hat))
+
+# Negative value of the conditional log-likelihood:
+def cobj(params, y): 
+    return - cond_loglikelihood_ar7(params,y)
+
+# Minimize the conditional log-likelihood using the L-BFGS-B algorithm:
+results = scipy.optimize.minimize(cobj, params, args = y, method='L-BFGS-B')
+results
+
+# We can see that the values of result.x are equal to the OLS parameters
+
+## Not the conditional
+
+def uobj(params, y): 
+    return - uncond_loglikelihood_ar7(params,y)
+
+bounds_constant = tuple((-np.inf, np.inf) for _ in range(1))
+bounds_phi = tuple((-1, 1) for _ in range(7))
+bounds_sigma = tuple((0,np.inf) for _ in range(1))
+bounds = bounds_constant + bounds_phi + bounds_sigma
+
+## L-BFGS-B support bounds
+results = scipy.optimize.minimize(uobj, results.x, args = y, method='L-BFGS-B', bounds = bounds)
+results
