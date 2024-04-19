@@ -71,7 +71,7 @@ data_cleaned.reset_index(drop=True, inplace=True) #We reset the index, now  firs
 data_cleaned.head()
 
 # The data are ready to be used
-#------------------------------
+
 
 
 # LET'S DEVELOP OUR AR(7) MODEL
@@ -81,7 +81,7 @@ Y = data_cleaned['INDPRO']
 Y
 
 # The AR(7) likelihood
-#--------------------------
+
 # DEFINING FUNCTIONS 
 import numpy as np
 import scipy 
