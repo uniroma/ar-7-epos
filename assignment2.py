@@ -278,6 +278,41 @@ forecast_df = pd.DataFrame({'Date': forecast_dates,
 # View:
 print(forecast_df)
 
+
+# ERRORS
+
+# Compute the ERRORS:
+from sklearn.metrics import mean_squared_error 
+
+errors_conditional = []
+errors_unconditional = []
+
+# Calculate the error for each monthly forecast:
+for i in range(8):
+    error_conditional = mean_squared_error([Y[i]], [forecast_conditional[i]])
+    errors_conditional.append(error_conditional)
+    
+    error_unconditional = mean_squared_error([Y[i]], [forecast_unconditional[i]])
+    errors_unconditional.append(error_unconditional)
+
+# Square root of the mean squared errors
+rmses_conditional = [np.sqrt(error) for error in errors_conditional]
+rmses_unconditional = [np.sqrt(error) for error in errors_unconditional]
+
+# Print the errors:
+print("Conditional monthly forecast MSE):", errors_conditional)
+print("Conditional monthly forecast RMSE:", rmses_conditional)
+
+print("Unconditional monthly forecast MSE):", errors_unconditional)
+print("Unconditional monthly forecast RMSE:", rmses_unconditional)
+
+# Percentage errors:
+errors_percentage_conditional = [error * 100 for error in errors_conditional]
+errors_percentage_unconditional = [error * 100 for error in errors_unconditional]
+
+print("Conditional percentage errors", errors_percentage_conditional)
+print("Unconditional percentage errors:", errors_percentage_unconditional)
+
 # CHECK FOR AUTOCORRELATION:
 import pandas as pd
 import matplotlib.pyplot as plt
