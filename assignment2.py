@@ -1,12 +1,14 @@
+# ASSIGNMENT 2
+
+
 import pandas as pd
 from numpy.linalg import solve
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-# Here we're going to transform the variables 
-#---------------------------------------------
-# Load the dataset
+
+# Load the dataset:
 data = pd.read_csv('INSERT HERE YOUR PATH WHERE YOU HAVE THE .csv file')
 data # I'm checking if dataset has been loaded correctly
 
@@ -207,15 +209,16 @@ params = np.hstack((beta, sigma2_hat))
 
 # Negative value of the conditional log-likelihood:
 def cobj(params, y):
-    # Compute the value of the objective function
+
+    # Compute the value of the objective function:
     value = -cond_loglikelihood_ar7(params, y)
     
-    # Handle invalid values
+    # Handle invalid values:
     if np.isnan(value):
-        #  If the value is invalid, return a large value to indicate an error
+        # If the value is invalid, return a large value to indicate an error:
         return 1e12
     else:
-        # Otherwise, return the computed value
+        # Otherwise, return the computed value:
         return value
 
 # Minimize the conditional log-likelihood using the L-BFGS-B algorithm:
@@ -237,3 +240,35 @@ bounds = bounds_constant + bounds_phi + bounds_sigma
 ## L-BFGS-B support bounds
 results2 = scipy.optimize.minimize(uobj, results1.x, args = y, method='L-BFGS-B', bounds = bounds)
 results2
+
+
+# FORECAST
+
+# Define the function for the AR(7) model:
+def forecast_ar7(params, y):
+    c = params[0] 
+    phi = params[1:8]
+    sigma2 = params[8]
+    # Create the lagged matrix (h=8):
+    X_forecast = lagged_matrix(y, 7)[-8:, :]
+    # Compute the forecast:
+    forecast = c + np.dot(X_forecast, phi)
+    return forecast
+
+# Define the starting point (January 1, 2000):
+start_date = '2000-01-01'
+forecast_dates = pd.date_range(start=start_date, periods=8, freq='MS')
+
+# Forecast using the parameters from the conditional approach:
+forecast_conditional = forecast_ar7(results1.x, Y)
+
+# Forecast using the parameters from the unconditional approach:
+forecast_unconditional = forecast_ar7(results2.x, Y)
+
+# Create a Dataframe for the forecasts:
+forecast_df = pd.DataFrame({'Date': forecast_dates,
+                            'Conditional Forecast': forecast_conditional,
+                            'Unconditional Forecast': forecast_unconditional})
+
+# View:
+print(forecast_df)
