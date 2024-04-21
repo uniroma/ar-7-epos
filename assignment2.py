@@ -277,3 +277,23 @@ forecast_df = pd.DataFrame({'Date': forecast_dates,
 
 # View:
 print(forecast_df)
+
+# CHECK FOR AUTOCORRELATION:
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Load data:
+indpro_series = data_cleaned['INDPRO']
+
+# Compute the autocorrelation function:
+acf = sm.tsa.acf(indpro_series, fft=True)
+
+# Plot ACF:
+plt.figure(figsize=(10, 6))
+plt.stem(acf)
+plt.xlabel('Lag')
+plt.ylabel('Autocorrelation')
+plt.title('Autocorrelation Function (ACF) for INDPRO')
+plt.grid(True)
+plt.show()
