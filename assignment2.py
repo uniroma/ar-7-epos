@@ -206,8 +206,17 @@ sigma2_hat = np.mean((yf - Xf@beta)**2)
 params = np.hstack((beta, sigma2_hat))
 
 # Negative value of the conditional log-likelihood:
-def cobj(params, y): 
-    return - cond_loglikelihood_ar7(params,y)
+def cobj(params, y):
+    # Compute the value of the objective function
+    value = -cond_loglikelihood_ar7(params, y)
+    
+    # Handle invalid values
+    if np.isnan(value):
+        #  If the value is invalid, return a large value to indicate an error
+        return 1e12
+    else:
+        # Otherwise, return the computed value
+        return value
 
 # Minimize the conditional log-likelihood using the L-BFGS-B algorithm:
 results1 = scipy.optimize.minimize(cobj, params, args = y, method='L-BFGS-B')
