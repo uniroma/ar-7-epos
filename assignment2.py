@@ -354,7 +354,7 @@ plt.title('Autocorrelation Function (ACF) for INDPRO')
 plt.grid(True)
 plt.show()
 
-# The positive values in both conditional and unconditional forecasts suggests expected increases in industrial production, while negative values suggest anticipated decreases.
+# The positive values in both conditional and unconditional forecasts suggest expected increases in industrial production, while negative values suggest anticipated decreases.
 # Fluctuations between positive and negative values suggest a degree of uncertainty or volatility in the industrial production outlook during this period.
-# Given that industrial production is a key driver of economic growth, these forecasts suggest that the industrial sector may have experienced periods of expansion and contraction over the eight-month period.
-# Factors such as changes in interest rates, government policies affecting the industrial sector, fluctuations in global demand for manufactured goods, and geopolitical events could all influence industrial production.
+# Given that industrial production is a strong key driver of economic growth, these forecasts suggest that the industrial sector probably may have experienced periods of expansion and contraction over the eight-month period.
+# Factors such as changes in interest rates, government policies that affect the industrial sector and fluctuations in global demand for manufactured goods could all influence industrial production.
