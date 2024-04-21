@@ -334,26 +334,7 @@ errors_percentage_unconditional = [error * 100 for error in errors_unconditional
 print("Conditional percentage errors", errors_percentage_conditional)
 print("Unconditional percentage errors:", errors_percentage_unconditional)
 
-# CHECK FOR AUTOCORRELATION:
-import pandas as pd
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-
-# Load data:
-indpro_series = data_cleaned['INDPRO']
-
-# Compute the autocorrelation function:
-acf = sm.tsa.acf(indpro_series, fft=True)
-
-# Plot ACF:
-plt.figure(figsize=(10, 6))
-plt.stem(acf)
-plt.xlabel('Lag')
-plt.ylabel('Autocorrelation')
-plt.title('Autocorrelation Function (ACF) for INDPRO')
-plt.grid(True)
-plt.show()
-
+# The positive values in both conditional and unconditional forecasts suggests expected increases in industrial production, while negative values suggest anticipated decreases.
 # The positive values in both conditional and unconditional forecasts suggest expected increases in industrial production, while negative values suggest anticipated decreases.
 # Fluctuations between positive and negative values suggest a degree of uncertainty or volatility in the industrial production outlook during this period.
 # Given that industrial production is a strong key driver of economic growth, these forecasts suggest that the industrial sector probably may have experienced periods of expansion and contraction over the eight-month period.
