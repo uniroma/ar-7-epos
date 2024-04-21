@@ -9,22 +9,19 @@ import matplotlib.dates as mdates
 
 
 # Load the dataset:
-data = pd.read_csv('INSERT HERE YOUR PATH WHERE YOU HAVE THE .csv file')
-data # I'm checking if dataset has been loaded correctly
+data = pd.read_csv('~/Downloads/current.csv')
+data # To check if dataset has been loaded correctly
 
-# Clean the DataFrame by removing the row with transformation codes
+# Clean the DataFrame by removing the row with transformation codes:
 data_cleaned = data.drop(index=0)
 data_cleaned.reset_index(drop=True, inplace=True)
 data_cleaned['sasdate'] = pd.to_datetime(data_cleaned['sasdate'], format='%m/%d/%Y')
 data_cleaned
 
-# Extract transformation codes
+# Extract transformation codes:
 transformation_codes = data.iloc[0, 1:].to_frame().reset_index()
 transformation_codes.columns = ['Series', 'Transformation_Code']
 
-# 'transformation_codes' has the variable’s name (Series) and its transformation 
-# (Transformation_Code). There are six possible transformations
-#to see them-->
 transformation_codes
 ## - `transformation_code=1`: no trasformation
 ## - `transformation_code=2`: $\Delta x_t$
@@ -76,17 +73,22 @@ data_cleaned.head()
 
 
 
-# LET'S DEVELOP OUR AR(7) MODEL
+# LET'S DEVELOP OUR AR(7) MODEL:
 
-# Dependent variable INDPRO
+
+# The AR(7) LIKELIHOOD
+
+# First step: PREPARE THE VARIABLES
+# Select only the dependent variable INDPRO
 Y = data_cleaned['INDPRO']
 Y
 
-# The AR(7) likelihood
 
-# DEFINING FUNCTIONS 
+# Import the libraries:
 import numpy as np
 import scipy 
+
+# Compute the unconditional mean and variance of the AR(7) model:
 def unconditional_ar_mean_variance(c, phis, sigma2): # 'c' = the constant term of the AR(7) model, 
                                                      # 'phis' = vector containing autoregressive coefficients of order 1 to 7
                                                      # 'sigma2' = the variance of the process.
@@ -96,22 +98,24 @@ def unconditional_ar_mean_variance(c, phis, sigma2): # 'c' = the constant term o
                                                      # first row and the main diagonal contains 1.
     A[0, :] = phis
     A[1:, 0:(p-1)] = np.eye(p-1)
-    ## Check for stationarity: checking whether all absolute values of the eigenvalues of A are less than 1. 
+
+    # Check for stationarity: checking whether all absolute values of the eigenvalues of A are less than 1. 
     # If this condition is met, the process is stationary and the stationary variable is set to True, otherwise to False.
     eigA = np.linalg.eig(A)
     if all(np.abs(eigA.eigenvalues)<1):
         stationary = True
     else:
         stationary = False
-    # Create the vector b, a vector of zeros
+
+    # Create the vector b, a vector of zeros:
     b = np.zeros((p, 1))
     b[0, 0] = c
     
-    # Compute the mean using matrix algebra (Stationary mean)
+    # Compute the mean using matrix algebra (Stationary mean):
     I = np.eye(p)
     mu = np.linalg.inv(I - A) @ b 
     
-    # Solve the discrete Lyapunov equation
+    # Solve the discrete Lyapunov equation:
     Q = np.zeros((p, p))
     Q[0, 0] = sigma2
     #Sigma = np.linalg.solve(I - np.kron(A, A), Q.flatten()).reshape(7, 7)
@@ -120,6 +124,7 @@ def unconditional_ar_mean_variance(c, phis, sigma2): # 'c' = the constant term o
     return mu.ravel(), Sigma, stationary
 
 
+# Import other libraries:
 from scipy.stats import norm
 from scipy.stats import multivariate_normal
 import numpy as np
